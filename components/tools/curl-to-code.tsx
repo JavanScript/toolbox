@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback } from "react";
-import { toGo, toJavaScript, toNodeAxios, toPython } from "curlconverter";
+import {
+  toGo,
+  toJavaScript,
+  toNodeAxios,
+  toPython,
+} from "curlconverter/dist/src/index.js";
 import { CopyButton } from "@/components/copy-button";
 import { useToast } from "@/components/toast-provider";
 import { useLocalStorage } from "@/hooks/use-local-storage";

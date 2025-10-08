@@ -1,26 +1,81 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0d12;
+  --background-elevated: rgba(255, 255, 255, 0.05);
+  --background-subtle: rgba(255, 255, 255, 0.03);
+  --foreground: rgba(255, 255, 255, 0.87);
+  --foreground-muted: rgba(255, 255, 255, 0.6);
+  --foreground-disabled: rgba(255, 255, 255, 0.38);
+  --accent: #58a6ff;
+  --accent-soft: rgba(88, 166, 255, 0.16);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --glow: rgba(88, 166, 255, 0.2);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-elevated: var(--background-elevated);
+  --color-background-subtle: var(--background-subtle);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-disabled: var(--foreground-disabled);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-surface-border: var(--surface-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #f5f7fb;
+    --background-elevated: rgba(10, 14, 22, 0.08);
+    --background-subtle: rgba(10, 14, 22, 0.05);
+    --foreground: #0b0d12;
+    --foreground-muted: rgba(11, 13, 18, 0.66);
+    --foreground-disabled: rgba(11, 13, 18, 0.45);
+    --accent: #2f81f7;
+    --accent-soft: rgba(47, 129, 247, 0.16);
+    --surface-border: rgba(10, 14, 22, 0.1);
+    --glow: rgba(47, 129, 247, 0.1);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+    sans-serif;
+  letter-spacing: -0.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--foreground);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+p {
+  color: var(--foreground-muted);
+  line-height: 1.7;
+}
+
+a {
+  color: var(--accent);
+}
+
+code,
+pre {
+  font-family: var(--font-mono), "JetBrains Mono", "Fira Code", monospace;
+}
+
+::selection {
+  background: var(--accent);
+  color: #0b0d12;
 }

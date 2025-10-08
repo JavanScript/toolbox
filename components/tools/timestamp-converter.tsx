@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { CopyButton } from "@/components/copy-button";
 import { useToast } from "@/components/toast-provider";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { ToolButton, ToolError } from "@/components/tools/tool-ui";
 
 interface TimestampState {
   unix: string;
@@ -39,15 +40,6 @@ export function TimestampConverter() {
   });
   const [mode, setMode] = useState<"seconds" | "milliseconds">("seconds");
   const { notify } = useToast();
-
-  const buttonBase =
-    "rounded-xl px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60";
-  const primaryButton =
-    `${buttonBase} bg-[var(--accent)] text-[#0b0d12] shadow-[0_20px_45px_-25px_var(--glow)] hover:bg-[#6baeff]`;
-  const secondaryButton =
-    `${buttonBase} border border-[var(--surface-border)]/70 bg-[var(--background-subtle)] text-[var(--foreground)] hover:border-[var(--accent)]/50`;
-  const ghostButton =
-    `${buttonBase} border border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]`;
 
   const syncFromUnix = useCallback(
     (raw: string) => {
@@ -164,40 +156,33 @@ export function TimestampConverter() {
         </div>
       </div>
 
-      {value.error ? (
-        <p className="flex items-center gap-2 rounded-xl border border-[var(--accent)]/40 bg-[rgba(88,166,255,0.06)] px-3 py-2 text-xs text-[var(--accent)]">
-          <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[var(--accent)]">
-            <path d="M11 7h2v6h-2V7Zm0 8h2v2h-2v-2Zm1-13C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z" fill="currentColor" />
-          </svg>
-          {value.error}
-        </p>
-      ) : null}
+      {value.error ? <ToolError message={value.error} /> : null}
 
       {relative ? (
-  <div className="rounded-3xl border border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.5)] p-5">
+        <div className="rounded-3xl border border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.5)] p-5">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--foreground-muted)]">Relative to now</p>
           <p className="mt-2 text-sm text-[var(--foreground)]">{relative}</p>
         </div>
       ) : null}
 
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <button type="button" onClick={handleToggleMode} className={secondaryButton}>
+        <ToolButton type="button" onClick={handleToggleMode} variant="secondary">
           {mode === "seconds" ? "Switch to milliseconds" : "Switch to seconds"}
-        </button>
-        <button type="button" onClick={handleNow} className={primaryButton}>
+        </ToolButton>
+        <ToolButton type="button" onClick={handleNow}>
           Use current time
-        </button>
-        <button
+        </ToolButton>
+        <ToolButton
           type="button"
           onClick={() => {
             reset();
             setMode("seconds");
             notify("Timestamp converter reset");
           }}
-          className={ghostButton}
+          variant="ghost"
         >
           Reset tool
-        </button>
+        </ToolButton>
       </div>
     </div>
   );

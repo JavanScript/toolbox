@@ -5,6 +5,8 @@ import { ulid } from "ulid";
 import { CopyButton } from "@/components/copy-button";
 import { useToast } from "@/components/toast-provider";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { copyText } from "@/lib/clipboard";
+import { ToolButton } from "@/components/tools/tool-ui";
 
 interface IdentifierEntry {
   uuid: string;
@@ -40,15 +42,6 @@ export function UuidGenerator() {
   });
   const { notify } = useToast();
 
-  const buttonBase =
-    "rounded-xl px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60";
-  const primaryButton =
-    `${buttonBase} bg-[var(--accent)] text-[#0b0d12] shadow-[0_20px_45px_-25px_var(--glow)] hover:bg-[#6baeff]`;
-  const secondaryButton =
-    `${buttonBase} border border-[var(--surface-border)]/70 bg-[var(--background-subtle)] text-[var(--foreground)] hover:border-[var(--accent)]/50`;
-  const ghostButton =
-    `${buttonBase} border border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]`;
-
   const handleGenerate = useCallback(() => {
     const entry: IdentifierEntry = {
       uuid: generateUuid(),
@@ -64,18 +57,7 @@ export function UuidGenerator() {
       .map((entry) => `UUID: ${entry.uuid}\nULID: ${entry.ulid}`)
       .join("\n\n");
     try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(payload);
-      } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = payload;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
+      await copyText(payload);
       notify("Identifiers copied");
     } catch (error) {
       console.error(error);
@@ -125,15 +107,15 @@ export function UuidGenerator() {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <button type="button" onClick={handleGenerate} className={primaryButton}>
+        <ToolButton type="button" onClick={handleGenerate}>
           Generate new set
-        </button>
-        <button type="button" onClick={handleCopyAll} className={secondaryButton}>
+        </ToolButton>
+        <ToolButton type="button" onClick={handleCopyAll} variant="secondary">
           Copy latest 10
-        </button>
-        <button type="button" onClick={handleReset} className={ghostButton}>
+        </ToolButton>
+        <ToolButton type="button" onClick={handleReset} variant="ghost">
           Clear history
-        </button>
+        </ToolButton>
       </div>
     </div>
   );

@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import { CopyButton } from "@/components/copy-button";
 import { useToast } from "@/components/toast-provider";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { copyText } from "@/lib/clipboard";
+import { ToolButton } from "@/components/tools/tool-ui";
 
 interface CaseState {
   input: string;
@@ -49,21 +51,6 @@ function sentenceCase(text: string) {
   return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
 
-async function copyToClipboard(value: string) {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(value);
-    return;
-  }
-  const textarea = document.createElement("textarea");
-  textarea.value = value;
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand("copy");
-  document.body.removeChild(textarea);
-}
-
 export function CaseConverter() {
   const { value, setValue, reset } = useLocalStorage<CaseState>("tool-case", {
     input: "Frictionless utility for developers",
@@ -85,15 +72,6 @@ export function CaseConverter() {
     ],
     [value.input, words]
   );
-
-  const buttonBase =
-    "rounded-xl px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60";
-  const primaryButton =
-    `${buttonBase} bg-[var(--accent)] text-[#0b0d12] shadow-[0_20px_45px_-25px_var(--glow)] hover:bg-[#6baeff]`;
-  const secondaryButton =
-    `${buttonBase} border border-[var(--surface-border)]/70 bg-[var(--background-subtle)] text-[var(--foreground)] hover:border-[var(--accent)]/50`;
-  const ghostButton =
-    `${buttonBase} border border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]`;
 
   return (
     <div className="space-y-6">
@@ -134,41 +112,40 @@ export function CaseConverter() {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <button
+        <ToolButton
           type="button"
           onClick={async () => {
             try {
-              await copyToClipboard(outputs.map((entry) => `${entry.label}: ${entry.value}`).join("\n"));
+              await copyText(outputs.map((entry) => `${entry.label}: ${entry.value}`).join("\n"));
               notify("All cases copied");
             } catch (error) {
               console.error(error);
               notify("Unable to copy");
             }
           }}
-          className={primaryButton}
         >
           Copy all cases
-        </button>
-        <button
+        </ToolButton>
+        <ToolButton
           type="button"
           onClick={() => {
             setValue({ input: value.input.trim() });
             notify("Trimmed whitespace");
           }}
-          className={secondaryButton}
+          variant="secondary"
         >
           Trim whitespace
-        </button>
-        <button
+        </ToolButton>
+        <ToolButton
           type="button"
           onClick={() => {
             reset();
             notify("Case converter reset");
           }}
-          className={ghostButton}
+          variant="ghost"
         >
           Reset tool
-        </button>
+        </ToolButton>
       </div>
     </div>
   );

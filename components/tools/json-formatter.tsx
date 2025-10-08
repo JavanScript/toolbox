@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { CopyButton } from "@/components/copy-button";
 import { useToast } from "@/components/toast-provider";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { ToolButton, ToolError } from "@/components/tools/tool-ui";
 
 interface JsonState {
   input: string;
@@ -21,15 +22,6 @@ export function JsonFormatter() {
   });
   const [mode, setMode] = useState<"pretty" | "compact">("pretty");
   const { notify } = useToast();
-
-  const buttonBase =
-    "rounded-xl px-5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60";
-  const primaryButton =
-    `${buttonBase} bg-[var(--accent)] text-[#0b0d12] shadow-[0_20px_45px_-25px_var(--glow)] hover:bg-[#6baeff]`;
-  const secondaryButton =
-    `${buttonBase} border border-[var(--surface-border)]/70 bg-[var(--background-subtle)] text-[var(--foreground)] hover:border-[var(--accent)]/50`;
-  const ghostButton =
-    `${buttonBase} border border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]`;
 
   const run = useCallback(
     (targetMode: "pretty" | "compact") => {
@@ -76,14 +68,7 @@ export function JsonFormatter() {
             className="min-h-[240px] w-full resize-y rounded-3xl border border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.82)] p-5 font-mono text-sm text-[var(--foreground)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] focus:border-[var(--accent)]/60 focus:outline-none"
             placeholder="Paste JSON here"
           />
-          {value.error ? (
-            <p className="flex items-center gap-2 rounded-xl border border-[var(--accent)]/40 bg-[rgba(88,166,255,0.06)] px-3 py-2 text-xs text-[var(--accent)]">
-              <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[var(--accent)]">
-                <path d="M11 7h2v6h-2V7Zm0 8h2v2h-2v-2Zm1-13C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z" fill="currentColor" />
-              </svg>
-              {value.error}
-            </p>
-          ) : null}
+          {value.error ? <ToolError message={value.error} /> : null}
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -101,23 +86,23 @@ export function JsonFormatter() {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <button
+        <ToolButton
           type="button"
           onClick={() => run("pretty")}
-          className={mode === "pretty" ? primaryButton : secondaryButton}
+          variant={mode === "pretty" ? "primary" : "secondary"}
         >
           Beautify JSON
-        </button>
-        <button
+        </ToolButton>
+        <ToolButton
           type="button"
           onClick={() => run("compact")}
-          className={mode === "compact" ? primaryButton : secondaryButton}
+          variant={mode === "compact" ? "primary" : "secondary"}
         >
           Minify JSON
-        </button>
-        <button type="button" onClick={handleClear} className={ghostButton}>
+        </ToolButton>
+        <ToolButton type="button" onClick={handleClear} variant="ghost">
           Reset tool
-        </button>
+        </ToolButton>
       </div>
     </div>
   );

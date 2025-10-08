@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useToast } from "@/components/toast-provider";
+import { copyText } from "@/lib/clipboard";
 
 interface CopyButtonProps {
   value: string;
@@ -15,25 +16,14 @@ export function CopyButton({ value, label = "Copy", variant = "solid" }: CopyBut
 
   const handleCopy = useCallback(async () => {
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(value);
-      } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = value;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
+      await copyText(value);
       setCopied(true);
       notify("Copied to clipboard");
       setTimeout(() => setCopied(false), 1600);
     } catch (error) {
       console.error("Failed to copy", error);
     }
-  }, [value]);
+  }, [notify, value]);
 
   const variantClassName = {
     solid:

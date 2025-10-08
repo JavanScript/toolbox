@@ -15,7 +15,7 @@ Open [http://localhost:3000](http://localhost:3000) to explore the experience. E
 
 - **Dark-first visual language** with layered surfaces, desaturated accents, and purposeful typography.
 - **Global omni-search** fixed in the header, piping into the command palette and the workspace's live filter.
-- **Interactive tool workspace** featuring JSON Formatter, Base64 Encoder/Decoder, and Timestamp Converter with persistent state, copy-first ergonomics, toast feedback, and responsive layout.
+- **Interactive tool workspace** featuring JSON Formatter, Base64 Encoder/Decoder, Timestamp Converter, JSON ↔ YAML, JSON ↔ CSV, Number Base Converter, Case Converter, and UUID/ULID generator—each with persistent state, copy-first ergonomics, toast feedback, and responsive layout.
 - **Principles spotlight** reinforcing the strategic differentiators (design, performance, privacy) without overwhelming the hero narrative.
 - **Future-facing roadmap context** kept lightweight so the real tools remain the primary focus.
 
@@ -33,9 +33,11 @@ The implementation is guided by the strategic doc in `Devtools.io Strategy and D
 - `app/page.tsx` – Slim landing page that centers the live workspace, hero story, principles, and supporting CTAs.
 - `app/globals.css` – Dark theme tokens, typography rules, and global resets tuned to the design language.
 - `components/tool-workspace.tsx` – Command palette-integrated workspace with category tags, search, and active tool host.
-- `components/tools/` – Actual tool implementations for JSON formatting, Base64 conversion, and timestamps.
+- `components/tools/` – Actual tool implementations spanning JSON formatting, Base64 conversion, timestamps, JSON ↔ YAML, JSON ↔ CSV, number base, case conversion, and UUID/ULID generation.
+- `components/tools/tool-ui.tsx` – Shared button variants and error banner primitives reused across the tool catalog.
 - `components/global-search.tsx` – Persistent top-level omnibox dispatching events into the workspace/palette.
 - `components/toast-provider.tsx` – Lightweight toast system used by copy buttons and tool actions.
+- `lib/clipboard.ts` – Clipboard helper that normalises copy fallback behaviour for tools and shared controls.
 - `public/` – Placeholder assets; swap or extend for future OG images and favicons.
 
 ## 🛣️ MVP toolset summary

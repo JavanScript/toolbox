@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/toast-provider";
 import { copyText } from "@/lib/clipboard";
 
@@ -12,6 +12,8 @@ interface CopyButtonProps {
 
 export function CopyButton({ value, label = "Copy", variant = "solid" }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { notify } = useToast();
 
   const handleCopy = useCallback(async () => {
@@ -19,11 +21,22 @@ export function CopyButton({ value, label = "Copy", variant = "solid" }: CopyBut
       await copyText(value);
       setCopied(true);
       notify("Copied to clipboard");
-      setTimeout(() => setCopied(false), 1600);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => setCopied(false), 1600);
     } catch (error) {
       console.error("Failed to copy", error);
     }
   }, [notify, value]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const variantClassName = {
     solid:
@@ -37,7 +50,21 @@ export function CopyButton({ value, label = "Copy", variant = "solid" }: CopyBut
   return (
     <button
       onClick={handleCopy}
-      className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${variantClassName}`}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+      aria-live="polite"
+      className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${
+        variantClassName
+      } ${
+        isPressed && variant === "solid"
+          ? "translate-y-[1px] shadow-[inset_0_0_0_1px_rgba(10,12,20,0.4)]"
+          : "shadow-[0_12px_35px_-28px_var(--glow)]"
+      } ${
+        copied
+          ? "border-[var(--accent)]/80 bg-[var(--accent)] text-[#0b0d12]"
+          : ""
+      }`}
       type="button"
     >
       <svg
@@ -59,7 +86,15 @@ export function CopyButton({ value, label = "Copy", variant = "solid" }: CopyBut
           fill="currentColor"
         />
       </svg>
-      {copied ? "Copied" : label}
+      <span className="relative flex items-center gap-2">
+        <span>{copied ? "Copied" : label}</span>
+        <span
+          className={`flex h-2 w-2 items-center justify-center rounded-full transition ${
+            copied ? "bg-[#0b0d12]" : "bg-[var(--accent)]/60"
+          }`}
+          aria-hidden
+        />
+      </span>
     </button>
   );
 }

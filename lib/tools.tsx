@@ -19,6 +19,8 @@ import { JavaScriptFormatterTool } from "@/components/tools/javascript-formatter
 import { JsonCsvConverter } from "@/components/tools/json-csv-converter";
 import { JsonFormatter } from "@/components/tools/json-formatter";
 import { JsonYamlConverter } from "@/components/tools/json-yaml-converter";
+import { JsonTomlConverter } from "@/components/tools/json-toml-converter";
+import { JsonXmlConverter } from "@/components/tools/json-xml-converter";
 import { LoremIpsumGenerator } from "@/components/tools/lorem-ipsum-generator";
 import { MarkdownToHtmlConverter } from "@/components/tools/markdown-to-html";
 import { MetaTagsGenerator } from "@/components/tools/meta-tags-generator";
@@ -31,6 +33,25 @@ import { SqlFormatterTool } from "@/components/tools/sql-formatter";
 import { TimestampConverter } from "@/components/tools/timestamp-converter";
 import { UuidGenerator } from "@/components/tools/uuid-generator";
 import { XmlFormatterTool } from "@/components/tools/xml-formatter";
+import { RegexTester } from "@/components/tools/regex-tester";
+import { WordCounter } from "@/components/tools/word-counter";
+import { SlugifyHelper } from "@/components/tools/slugify-helper";
+import { UrlEncoderDecoder } from "@/components/tools/url-encoder-decoder";
+import { HashGenerator } from "@/components/tools/hash-generator";
+import { TextDiffChecker } from "@/components/tools/text-diff-checker";
+import { LineSorter } from "@/components/tools/line-sorter";
+import { PrefixSuffixTool } from "@/components/tools/prefix-suffix";
+import { TextEscaper } from "@/components/tools/text-escaper";
+import { WhitespaceRemover } from "@/components/tools/whitespace-remover";
+import { ColorPickerTool } from "@/components/tools/color-picker";
+import { PaletteGenerator } from "@/components/tools/palette-generator";
+import { ContrastChecker } from "@/components/tools/contrast-checker";
+import { ColorShades } from "@/components/tools/color-shades";
+import { ImageToBase64 } from "@/components/tools/image-to-base64";
+import { Base64ToImage } from "@/components/tools/base64-to-image";
+import { SvgOptimizer } from "@/components/tools/svg-optimizer";
+import { JwtDebugger } from "@/components/tools/jwt-debugger";
+import { UserAgentParserTool } from "@/components/tools/user-agent-parser";
 
 export interface ToolDefinition {
   id: string;
@@ -53,6 +74,26 @@ export const toolDefinitions: ToolDefinition[] = [
       "Paste JSON or YAML, validate the structure instantly, and round-trip the data without losing formatting.",
     keywords: ["json", "yaml", "converter", "data", "serialization"],
     component: JsonYamlConverter,
+  },
+  {
+    id: "json-toml",
+    name: "JSON ↔ TOML Converter",
+    category: "Converters",
+    headline: "Convert configuration objects between JSON and TOML in seconds.",
+    description:
+      "Parse JSON or TOML safely, round-trip your config files, and copy the results with confidence in formatting.",
+    keywords: ["json", "toml", "converter", "config", "serialization"],
+    component: JsonTomlConverter,
+  },
+  {
+    id: "json-xml",
+    name: "JSON ↔ XML Converter",
+    category: "Converters",
+    headline: "Bridge structured JSON and verbose XML with attribute-aware parsing.",
+    description:
+      "Handle XML declarations, attributes, and nested arrays while keeping JSON readable and well-formatted.",
+    keywords: ["json", "xml", "converter", "data"],
+    component: JsonXmlConverter,
   },
   {
     id: "json-csv",
@@ -113,6 +154,26 @@ export const toolDefinitions: ToolDefinition[] = [
       "Handle text and binary-safe conversions with clipboard-friendly outputs and decoding safeguards.",
     keywords: ["base64", "encode", "decode", "string"],
     component: Base64Tool,
+  },
+  {
+    id: "image-to-base64",
+    name: "Image → Base64",
+    category: "Converters",
+    headline: "Encode images into Base64 strings entirely client-side.",
+    description:
+      "Drop an image, preview it instantly, and copy the data URL or raw Base64 with wrapping controls.",
+    keywords: ["image", "base64", "encoder", "data url"],
+    component: ImageToBase64,
+  },
+  {
+    id: "base64-to-image",
+    name: "Base64 → Image",
+    category: "Converters",
+    headline: "Reconstruct images from Base64 or data URLs.",
+    description:
+      "Paste Base64 strings, render a live preview, and download the decoded asset with MIME customization.",
+    keywords: ["base64", "image", "decoder", "preview"],
+    component: Base64ToImage,
   },
   {
     id: "json-formatter",
@@ -225,6 +286,56 @@ export const toolDefinitions: ToolDefinition[] = [
     component: ColorFormatConverter,
   },
   {
+    id: "color-picker",
+    name: "Color Picker",
+    category: "Design",
+    headline: "Select colors with live previews and multi-format outputs.",
+    description:
+      "Adjust alpha, copy HEX/RGB/HSLA/HWB values, and keep a history of recent swatches for rapid iteration.",
+    keywords: ["color", "picker", "hex", "rgba", "design"],
+    component: ColorPickerTool,
+  },
+  {
+    id: "palette-generator",
+    name: "Palette Generator",
+    category: "Design",
+    headline: "Build harmonious color palettes from any base hue.",
+    description:
+      "Explore analogous, complementary, triadic, and monochromatic schemes with copy-ready swatches.",
+    keywords: ["color", "palette", "design", "harmonies"],
+    component: PaletteGenerator,
+  },
+  {
+    id: "contrast-checker",
+    name: "Contrast Checker",
+    category: "Design",
+    headline: "Validate WCAG contrast ratios for accessibility.",
+    description:
+      "Compare foreground and background colors, preview sample text, and see pass/fail status for AA/AAA criteria.",
+    keywords: ["contrast", "wcag", "accessibility", "color"],
+    component: ContrastChecker,
+  },
+  {
+    id: "color-shades",
+    name: "Color Shades",
+    category: "Design",
+    headline: "Generate balanced tints and shades around a base color.",
+    description:
+      "Create light and dark ramps, adjust the number of steps, and copy every hex in a single click.",
+    keywords: ["color", "shades", "design", "palette"],
+    component: ColorShades,
+  },
+  {
+    id: "svg-optimizer",
+    name: "SVG Optimizer",
+    category: "Design",
+    headline: "Minify SVG markup with SVGO presets and stats.",
+    description:
+      "Toggle multipass, keep critical attributes like viewBox, and copy optimized markup with savings breakdowns.",
+    keywords: ["svg", "optimize", "design", "svgo"],
+    component: SvgOptimizer,
+  },
+  {
     id: "css-unit",
     name: "CSS Unit Converter",
     category: "CSS",
@@ -285,6 +396,16 @@ export const toolDefinitions: ToolDefinition[] = [
     component: CaseConverter,
   },
   {
+    id: "regex-tester",
+    name: "Regex Tester",
+    category: "Text",
+    headline: "Debug regular expressions with instant match diagnostics.",
+    description:
+      "Experiment with patterns and flags, inspect captured groups, and copy match results without leaving the browser.",
+    keywords: ["regex", "regular expression", "tester", "pattern"],
+    component: RegexTester,
+  },
+  {
     id: "lorem-ipsum",
     name: "Lorem Ipsum Generator",
     category: "Text",
@@ -293,6 +414,76 @@ export const toolDefinitions: ToolDefinition[] = [
       "Control length, style, and capitalization for placeholder text that matches design mocks.",
     keywords: ["lorem", "ipsum", "text", "generator"],
     component: LoremIpsumGenerator,
+  },
+  {
+    id: "word-counter",
+    name: "Word Counter",
+    category: "Text",
+    headline: "Measure readability with comprehensive text statistics.",
+    description:
+      "Track words, characters, sentences, and paragraphs while estimating reading time for your content.",
+    keywords: ["word count", "text", "analysis", "reading time"],
+    component: WordCounter,
+  },
+  {
+    id: "slugify",
+    name: "Slugify Helper",
+    category: "Text",
+    headline: "Generate URL-ready slugs with delimiter and casing controls.",
+    description:
+      "Normalize strings, remove diacritics, and tweak casing to produce clean slugs for SEO or file names.",
+    keywords: ["slug", "url", "text", "converter"],
+    component: SlugifyHelper,
+  },
+  {
+    id: "text-diff",
+    name: "Text Diff Checker",
+    category: "Text",
+    headline: "Compare two blocks of text with unified or split views.",
+    description:
+      "Highlight additions and removals, ignore whitespace when needed, and copy or reset with a click.",
+    keywords: ["diff", "text", "compare", "changes"],
+    component: TextDiffChecker,
+  },
+  {
+    id: "line-sorter",
+    name: "Line Sorter",
+    category: "Text",
+    headline: "Sort and deduplicate lines with granular controls.",
+    description:
+      "Toggle ascending or descending order, trim whitespace, and remove duplicates with case sensitivity options.",
+    keywords: ["lines", "sort", "text", "dedupe"],
+    component: LineSorter,
+  },
+  {
+    id: "prefix-suffix",
+    name: "Prefix & Suffix",
+    category: "Text",
+    headline: "Bulk add prefixes and suffixes to every line.",
+    description:
+      "Apply framing strings, skip blank lines, and trim edges to prepare lists for code or copy.",
+    keywords: ["text", "prefix", "suffix", "batch"],
+    component: PrefixSuffixTool,
+  },
+  {
+    id: "text-escaper",
+    name: "Text Escaper",
+    category: "Text",
+    headline: "Escape or unescape HTML, JSON, and URL characters.",
+    description:
+      "Switch between encoding sets instantly and copy the sanitized result into your workflow.",
+    keywords: ["text", "escape", "encode", "html", "json"],
+    component: TextEscaper,
+  },
+  {
+    id: "whitespace-remover",
+    name: "Whitespace Remover",
+    category: "Text",
+    headline: "Trim, collapse, or normalize whitespace in one step.",
+    description:
+      "Strip leading/trailing spaces, collapse internal runs, and convert tabs for tidy text snippets.",
+    keywords: ["text", "whitespace", "trim", "cleanup"],
+    component: WhitespaceRemover,
   },
   {
     id: "fake-data",
@@ -313,6 +504,26 @@ export const toolDefinitions: ToolDefinition[] = [
       "Generate fresh UUID v4 and ULID pairs, keep the recent set handy, and copy them into your workflow.",
     keywords: ["uuid", "ulid", "identifier", "generator"],
     component: UuidGenerator,
+  },
+  {
+    id: "hash-generator",
+    name: "Hash Generator",
+    category: "Security",
+    headline: "Generate SHA hashes with the Web Crypto API.",
+    description:
+      "Choose between SHA-1, SHA-256, SHA-384, and SHA-512, hash any string, and copy the result securely.",
+    keywords: ["hash", "sha", "security", "crypto"],
+    component: HashGenerator,
+  },
+  {
+    id: "jwt-debugger",
+    name: "JWT Debugger",
+    category: "Security",
+    headline: "Decode and inspect JSON Web Tokens with optional HMAC verification.",
+    description:
+      "View header and payload JSON, analyze claim timelines, and validate HS256/384/512 signatures with a shared secret.",
+    keywords: ["jwt", "token", "security", "decode"],
+    component: JwtDebugger,
   },
   {
     id: "qr-code",
@@ -343,6 +554,26 @@ export const toolDefinitions: ToolDefinition[] = [
       "Fill in titles, descriptions, preview images, and open graph metadata with instant HTML snippets.",
     keywords: ["meta", "seo", "open graph", "tags"],
     component: MetaTagsGenerator,
+  },
+  {
+    id: "url-encoder",
+    name: "URL Encoder / Decoder",
+    category: "Networking",
+    headline: "Encode and decode URL components without breaking strings.",
+    description:
+      "Convert text to percent-encoded form, decode safely, and preview the decoded output side-by-side.",
+    keywords: ["url", "encode", "decode", "networking"],
+    component: UrlEncoderDecoder,
+  },
+  {
+    id: "user-agent-parser",
+    name: "User Agent Parser",
+    category: "Networking",
+    headline: "Break down browser, device, and OS details from any UA string.",
+    description:
+      "Paste a user agent, capture your current browser, and review structured JSON summaries with key signals.",
+    keywords: ["user agent", "ua", "browser", "device"],
+    component: UserAgentParserTool,
   },
   {
     id: "password-generator",

@@ -107,24 +107,28 @@ export function ToolWorkspace() {
   return (
     <div
       ref={containerRef}
-      className="flex h-full max-h-screen min-h-screen w-full flex-col overflow-hidden rounded-b-[40px] border border-[var(--surface-border)]/80 bg-[rgba(10,12,20,0.78)] shadow-[0_40px_120px_-60px_var(--glow)] backdrop-blur-xl"
+      className="flex h-full min-h-[640px] w-full flex-col overflow-hidden rounded-[40px] border border-[var(--surface-border)]/80 bg-[rgba(10,12,20,0.78)] shadow-[0_40px_120px_-60px_var(--glow)] backdrop-blur-xl"
     >
-      <header className="flex flex-col gap-6 border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.85)] px-5 py-6 sm:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(88,166,255,0.12)] text-base font-semibold text-[var(--accent)] transition-transform duration-300 ease-out will-change-transform hover:scale-[1.03]">
+      <header className="relative overflow-hidden border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.88)] px-5 py-6 shadow-[inset_0_-1px_0_rgba(88,166,255,0.08)] sm:px-8">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(88,166,255,0.4)] to-transparent" aria-hidden />
+        <div className="pointer-events-none absolute -top-20 right-0 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(88,166,255,0.18),transparent_70%)] blur-3xl" aria-hidden />
+        <div className="relative flex flex-wrap items-center justify-between gap-6">
+          <div className="flex flex-1 items-start gap-3">
+            <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[rgba(88,166,255,0.16)] text-base font-semibold text-[var(--accent)] transition-transform duration-300 ease-out will-change-transform hover:scale-[1.04]">
               d·
             </span>
-            <div className="space-y-0.5">
-              <p className="text-[11px] uppercase tracking-[0.4em] text-[var(--foreground-muted)]">
-                devtools.io
-              </p>
-              <p className="text-xs text-[var(--foreground-muted)]">
-                Frictionless developer utilities
-              </p>
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <p className="text-[11px] uppercase tracking-[0.42em] text-[var(--foreground-muted)]">
+                  devtools.io
+                </p>
+                <p className="text-sm font-medium text-[var(--foreground)]">
+                  Frictionless developer utilities, crafted for focus.
+                </p>
+              </div>
             </div>
           </div>
-          <div className="flex flex-1 flex-wrap items-center justify-end gap-3">
+          <div className="flex min-w-full flex-1 flex-wrap items-center justify-end gap-3 sm:min-w-[280px] lg:min-w-[320px]">
             <div className="relative flex min-w-[220px] flex-1">
               <svg
                 aria-hidden
@@ -200,74 +204,98 @@ export function ToolWorkspace() {
             </span>
           </div>
 
-          <div className="mt-6 flex-1 overflow-y-auto pr-1">
-          {searchQuery ? (
-            filteredTools.length > 0 ? (
-              <ul className="space-y-1">
-                {filteredTools.map((tool) => {
-                  const isActive = tool.id === activeTool?.id;
-                  return (
-                    <li key={tool.id}>
-                      <button
-                        type="button"
-                        onClick={() => handleSelect(tool.id)}
-                        className={`flex w-full flex-col items-start rounded-2xl border px-3 py-2 text-left text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${
-                          isActive
-                            ? "border-[var(--accent)]/70 bg-[rgba(88,166,255,0.16)] text-[var(--foreground)]"
-                            : "border-transparent text-[var(--foreground-muted)] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
-                        }`}
-                        aria-current={isActive ? "true" : undefined}
-                      >
-                        <span className="font-medium text-[var(--foreground)]">{tool.name}</span>
-                        <span className="text-xs text-[var(--foreground-muted)]">{tool.category}</span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="rounded-2xl border border-[var(--surface-border)]/60 bg-[rgba(10,12,20,0.6)] px-4 py-3 text-sm text-[var(--foreground-muted)]">
-                No tools match "{searchQuery}".
-              </p>
-            )
-          ) : (
-              <div className="space-y-5">
-              {groupedTools.map(({ category, tools }) => (
-                <div key={category} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)]">
-                      {category}
-                    </span>
-                    <span className="rounded-full border border-[var(--surface-border)]/50 px-2 py-0.5 text-[10px] text-[var(--foreground-disabled)]">
-                      {tools.length}
-                    </span>
-                  </div>
+          <div className="relative mt-6 flex-1 overflow-hidden">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[rgba(8,10,16,0.92)] via-[rgba(8,10,16,0.86)]/60 to-transparent" aria-hidden />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-[rgba(8,10,16,0.92)] via-[rgba(8,10,16,0.86)]/60 to-transparent" aria-hidden />
+            <div className="scrollbar-soft flex h-full flex-col overflow-y-auto pr-1">
+              {searchQuery ? (
+                filteredTools.length > 0 ? (
                   <ul className="space-y-1">
-                    {tools.map((tool) => {
+                    {filteredTools.map((tool) => {
                       const isActive = tool.id === activeTool?.id;
                       return (
                         <li key={tool.id}>
                           <button
                             type="button"
                             onClick={() => handleSelect(tool.id)}
-                            className={`flex w-full flex-col items-start rounded-2xl border px-3 py-2 text-left text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${
+                            className={`group flex w-full items-start gap-3 rounded-2xl border px-3 py-2 text-left text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${
                               isActive
                                 ? "border-[var(--accent)]/70 bg-[rgba(88,166,255,0.16)] text-[var(--foreground)]"
-                                : "border-[var(--surface-border)]/30 bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
+                                : "border-transparent text-[var(--foreground-muted)] hover:-translate-y-[1px] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
                             }`}
                             aria-current={isActive ? "true" : undefined}
                           >
-                            <span className="font-medium text-[var(--foreground)]">{tool.name}</span>
-                            <span className="text-xs text-[var(--foreground-muted)]">{tool.headline}</span>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-[var(--foreground)]">{tool.name}</span>
+                              <span className="text-xs text-[var(--foreground-muted)]">{tool.category}</span>
+                            </div>
+                            <span
+                              className={`ml-auto mt-1 inline-flex h-2 w-2 flex-shrink-0 items-center justify-center rounded-full transition ${
+                                isActive
+                                  ? "bg-[var(--accent)]"
+                                  : "bg-[var(--surface-border)]/80 group-hover:bg-[var(--accent)]/60"
+                              }`}
+                              aria-hidden
+                            />
                           </button>
                         </li>
                       );
                     })}
                   </ul>
+                ) : (
+                  <p className="rounded-2xl border border-[var(--surface-border)]/60 bg-[rgba(10,12,20,0.6)] px-4 py-3 text-sm text-[var(--foreground-muted)]">
+                    No tools match "{searchQuery}".
+                  </p>
+                )
+              ) : (
+                <div className="space-y-5">
+                  {groupedTools.map(({ category, tools }) => (
+                    <div key={category} className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)]">
+                          {category}
+                        </span>
+                        <span className="rounded-full border border-[var(--surface-border)]/50 px-2 py-0.5 text-[10px] text-[var(--foreground-disabled)]">
+                          {tools.length}
+                        </span>
+                      </div>
+                      <ul className="space-y-1">
+                        {tools.map((tool) => {
+                          const isActive = tool.id === activeTool?.id;
+                          return (
+                            <li key={tool.id}>
+                              <button
+                                type="button"
+                                onClick={() => handleSelect(tool.id)}
+                                className={`group flex w-full items-start gap-3 rounded-2xl border px-3 py-2 text-left text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${
+                                  isActive
+                                    ? "border-[var(--accent)]/70 bg-[rgba(88,166,255,0.16)] text-[var(--foreground)]"
+                                    : "border-[var(--surface-border)]/30 bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:-translate-y-[1px] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
+                                }`}
+                                aria-current={isActive ? "true" : undefined}
+                              >
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-[var(--foreground)]">{tool.name}</span>
+                                  <span className="text-xs text-[var(--foreground-muted)]">{tool.headline}</span>
+                                </div>
+                                <span
+                                  className={`ml-auto inline-flex h-2 w-2 flex-shrink-0 rounded-full transition ${
+                                    isActive
+                                      ? "bg-[var(--accent)]"
+                                      : "bg-[var(--surface-border)]/80 group-hover:bg-[var(--accent)]/60"
+                                  }`}
+                                  aria-hidden
+                                />
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
           </div>
 
           <div className="mt-5 hidden rounded-2xl border border-[var(--surface-border)]/60 px-3 py-2 text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)] lg:flex">
@@ -280,14 +308,19 @@ export function ToolWorkspace() {
             {activeTool ? (
               <div className="space-y-6">
                 <ToolHeader tool={activeTool} />
-                <div className="rounded-3xl border border-[var(--surface-border)]/40 bg-[var(--background-subtle)] p-6 shadow-[0_30px_120px_-90px_var(--glow)] transition-shadow duration-300 hover:shadow-[0_45px_140px_-90px_var(--glow)]">
-                  {activeTool.component ? (
-                    <activeTool.component />
-                  ) : (
-                    <p className="text-sm text-[var(--foreground-muted)]">
-                      Tool implementation coming soon.
-                    </p>
-                  )}
+                <div className="glass-panel rounded-3xl border border-[var(--surface-border)]/50 p-6 shadow-[0_30px_120px_-90px_var(--glow)] transition-shadow duration-300">
+                  <div className="flex flex-col gap-5">
+                    <div className="relative rounded-2xl border border-[var(--surface-border)]/30 bg-[rgba(10,12,20,0.8)] p-4">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(88,166,255,0.2)] to-transparent" aria-hidden />
+                      {activeTool.component ? (
+                        <activeTool.component />
+                      ) : (
+                        <p className="text-sm text-[var(--foreground-muted)]">
+                          Tool implementation coming soon.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (

@@ -1,13 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { CommandPalette } from "@/components/command-palette";
 import type { ToolDefinition } from "@/lib/tools";
 import { toolDefinitions } from "@/lib/tools";
-
-function dedupe<T>(items: T[]): T[] {
-  return Array.from(new Set(items));
-}
 
 function ToolHeader({ tool }: { tool: ToolDefinition }) {
   return (
@@ -31,15 +28,11 @@ export function ToolWorkspace() {
   const [searchQuery, setSearchQuery] = useState("");
   const [paletteQuery, setPaletteQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const activeTool = useMemo(
     () => toolDefinitions.find((tool) => tool.id === activeToolId) ?? toolDefinitions[0],
     [activeToolId]
-  );
-
-  const categories = useMemo(
-    () => dedupe(toolDefinitions.map((tool) => tool.category)),
-    []
   );
 
   const filteredTools = useMemo(() => {
@@ -51,12 +44,46 @@ export function ToolWorkspace() {
     });
   }, [searchQuery]);
 
+  const groupedTools = useMemo(() => {
+    const groups = new Map<string, ToolDefinition[]>();
+    toolDefinitions.forEach((tool) => {
+      if (!groups.has(tool.category)) {
+        groups.set(tool.category, []);
+      }
+      groups.get(tool.category)!.push(tool);
+    });
+    return Array.from(groups.entries()).map(([category, tools]) => ({
+      category,
+      tools: tools.sort((a, b) => a.name.localeCompare(b.name)),
+    }));
+  }, []);
+
   const handleSelect = useCallback((toolId: string) => {
     setActiveToolId(toolId);
     setPaletteOpen(false);
     setSearchQuery("");
     setPaletteQuery("");
   }, []);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
+
+  const handleSearchKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        setPaletteQuery(searchQuery.trim());
+        setPaletteOpen(true);
+      }
+      if (event.key === "Escape") {
+        setSearchQuery("");
+        setPaletteQuery("");
+        searchInputRef.current?.blur();
+      }
+    },
+    [searchQuery]
+  );
 
   useEffect(() => {
     function handleExternalSearch(event: Event) {
@@ -80,121 +107,194 @@ export function ToolWorkspace() {
   return (
     <div
       ref={containerRef}
-      className="flex h-[620px] w-full flex-col overflow-hidden rounded-3xl border border-[var(--surface-border)]/80 bg-[rgba(10,12,20,0.72)] backdrop-blur-xl"
+      className="flex h-full max-h-screen min-h-screen w-full flex-col overflow-hidden rounded-b-[40px] border border-[var(--surface-border)]/80 bg-[rgba(10,12,20,0.78)] shadow-[0_40px_120px_-60px_var(--glow)] backdrop-blur-xl"
     >
-      <div className="flex flex-col gap-4 border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.85)] p-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <div className="relative flex-1">
-            <svg
-              aria-hidden
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]"
-            >
-              <path
-                d="m20.71 19.29-3.4-3.39A7.92 7.92 0 0 0 18 11a8 8 0 1 0-8 8 7.92 7.92 0 0 0 4.9-1.69l3.39 3.4a1 1 0 0 0 1.42-1.42ZM6 11a5 5 0 1 1 5 5 5 5 0 0 1-5-5Z"
-                fill="currentColor"
-              />
-            </svg>
-            <input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search tools, categories, or keywords"
-              className="w-full rounded-2xl border border-[var(--surface-border)]/60 bg-[var(--background-subtle)] py-3 pl-12 pr-4 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:border-[var(--accent)]/60 focus:outline-none"
-            />
-          </div>
-          <button
-            onClick={() => {
-              setPaletteQuery("");
-              setPaletteOpen(true);
-            }}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--surface-border)]/70 bg-[var(--background-subtle)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--foreground-muted)] transition hover:border-[var(--accent)]/60 hover:text-[var(--foreground)]"
-          >
-            <svg
-              aria-hidden
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-[var(--accent)]"
-            >
-              <path d="M18 18v-6h-2v4h-4v2h6Zm-8-8V4H8v4H4v2h6Z" fill="currentColor" />
-            </svg>
-            Command palette
-            <span className="rounded-md border border-[var(--surface-border)]/70 px-2 py-0.5 text-[10px] tracking-[0.3em] text-[var(--foreground-muted)]">
-              ⌘K
+      <header className="flex flex-col gap-6 border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.85)] px-5 py-6 sm:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(88,166,255,0.12)] text-base font-semibold text-[var(--accent)] transition-transform duration-300 ease-out will-change-transform hover:scale-[1.03]">
+              d·
             </span>
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2 overflow-x-auto pb-1">
-          {categories.map((category) => {
-            const isActiveCategory = activeTool?.category === category;
-            return (
-              <button
-                key={category}
-                onClick={() => {
-                  const firstMatch = toolDefinitions.find((tool) => tool.category === category);
-                  if (firstMatch) {
-                    handleSelect(firstMatch.id);
-                  }
-                }}
-                className={`rounded-full border px-4 py-1 text-[11px] uppercase tracking-[0.35em] transition ${
-                  isActiveCategory
-                    ? "border-[var(--accent)]/80 bg-[rgba(88,166,255,0.18)] text-[var(--foreground)]"
-                    : "border-[var(--surface-border)]/50 bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:border-[var(--accent)]/50 hover:text-[var(--foreground)]"
-                }`}
+            <div className="space-y-0.5">
+              <p className="text-[11px] uppercase tracking-[0.4em] text-[var(--foreground-muted)]">
+                devtools.io
+              </p>
+              <p className="text-xs text-[var(--foreground-muted)]">
+                Frictionless developer utilities
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-1 flex-wrap items-center justify-end gap-3">
+            <div className="relative flex min-w-[220px] flex-1">
+              <svg
+                aria-hidden
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]"
               >
-                {category}
-              </button>
-            );
-          })}
+                <path
+                  d="m20.71 19.29-3.4-3.39A7.92 7.92 0 0 0 18 11a8 8 0 1 0-8 8 7.92 7.92 0 0 0 4.9-1.69l3.39 3.4a1 1 0 0 0 1.42-1.42ZM6 11a5 5 0 1 1 5 5 5 5 0 0 1-5-5Z"
+                  fill="currentColor"
+                />
+              </svg>
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={(event) => handleSearchChange(event.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Search tools or press ⌘K"
+                className="w-full rounded-2xl border border-[var(--surface-border)]/60 bg-[rgba(10,12,20,0.7)] py-3 pl-12 pr-4 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] transition focus:border-[var(--accent)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setPaletteQuery("");
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--surface-border)]/60 bg-[rgba(10,12,20,0.7)] p-1 text-[var(--foreground-muted)] transition hover:text-[var(--foreground)]"
+                  aria-label="Clear search"
+                >
+                  <svg aria-hidden width="12" height="12" viewBox="0 0 24 24" fill="none">
+                    <path d="M18 6 6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              ) : (
+                <div className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center gap-2 rounded-lg border border-[var(--surface-border)]/60 px-2 py-1 text-[10px] uppercase tracking-[0.3em] text-[var(--foreground-muted)] lg:inline-flex">
+                  ⌘K
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setPaletteQuery(searchQuery.trim());
+                setPaletteOpen(true);
+              }}
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-[var(--surface-border)]/70 bg-[rgba(10,12,20,0.65)] px-4 text-[11px] font-semibold uppercase tracking-[0.35em] text-[var(--foreground-muted)] transition hover:border-[var(--accent)]/60 hover:text-[var(--foreground)]"
+            >
+              <svg
+                aria-hidden
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-[var(--accent)]"
+              >
+                <path d="M18 18v-6h-2v4h-4v2h6Zm-8-8V4H8v4H4v2h6Z" fill="currentColor" />
+              </svg>
+              Palette
+            </button>
+          </div>
         </div>
-        {searchQuery ? (
-          <div className="rounded-2xl border border-[var(--surface-border)]/60 bg-[rgba(10,12,20,0.6)] p-4">
-            {filteredTools.length > 0 ? (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredTools.map((tool) => (
-                  <button
-                    key={tool.id}
-                    onClick={() => handleSelect(tool.id)}
-                    className={`flex flex-col rounded-xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${
-                      tool.id === activeTool?.id
-                        ? "border-[var(--accent)]/80 bg-[rgba(88,166,255,0.18)] text-[var(--foreground)]"
-                        : "border-[var(--surface-border)]/40 bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    <span className="text-sm font-semibold text-[var(--foreground)]">{tool.name}</span>
-                    <span className="mt-1 text-xs text-[var(--foreground-muted)]">{tool.headline}</span>
-                  </button>
-                ))}
+      </header>
+      <div className="flex flex-1 flex-col lg:flex-row">
+        <aside className="flex w-full flex-shrink-0 flex-col border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.85)] px-5 pb-6 pt-5 transition lg:w-[320px] lg:border-b-0 lg:border-r lg:px-7 lg:py-8">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)]">
+            <span>{searchQuery ? "Search results" : "Tool collections"}</span>
+            <span className="rounded-full border border-[var(--surface-border)]/50 px-2 py-0.5 text-[10px] text-[var(--foreground-disabled)]">
+              {searchQuery ? filteredTools.length : toolDefinitions.length}
+            </span>
+          </div>
+
+          <div className="mt-6 flex-1 overflow-y-auto pr-1">
+          {searchQuery ? (
+            filteredTools.length > 0 ? (
+              <ul className="space-y-1">
+                {filteredTools.map((tool) => {
+                  const isActive = tool.id === activeTool?.id;
+                  return (
+                    <li key={tool.id}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelect(tool.id)}
+                        className={`flex w-full flex-col items-start rounded-2xl border px-3 py-2 text-left text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${
+                          isActive
+                            ? "border-[var(--accent)]/70 bg-[rgba(88,166,255,0.16)] text-[var(--foreground)]"
+                            : "border-transparent text-[var(--foreground-muted)] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
+                        }`}
+                        aria-current={isActive ? "true" : undefined}
+                      >
+                        <span className="font-medium text-[var(--foreground)]">{tool.name}</span>
+                        <span className="text-xs text-[var(--foreground-muted)]">{tool.category}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="rounded-2xl border border-[var(--surface-border)]/60 bg-[rgba(10,12,20,0.6)] px-4 py-3 text-sm text-[var(--foreground-muted)]">
+                No tools match "{searchQuery}".
+              </p>
+            )
+          ) : (
+              <div className="space-y-5">
+              {groupedTools.map(({ category, tools }) => (
+                <div key={category} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)]">
+                      {category}
+                    </span>
+                    <span className="rounded-full border border-[var(--surface-border)]/50 px-2 py-0.5 text-[10px] text-[var(--foreground-disabled)]">
+                      {tools.length}
+                    </span>
+                  </div>
+                  <ul className="space-y-1">
+                    {tools.map((tool) => {
+                      const isActive = tool.id === activeTool?.id;
+                      return (
+                        <li key={tool.id}>
+                          <button
+                            type="button"
+                            onClick={() => handleSelect(tool.id)}
+                            className={`flex w-full flex-col items-start rounded-2xl border px-3 py-2 text-left text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/60 ${
+                              isActive
+                                ? "border-[var(--accent)]/70 bg-[rgba(88,166,255,0.16)] text-[var(--foreground)]"
+                                : "border-[var(--surface-border)]/30 bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
+                            }`}
+                            aria-current={isActive ? "true" : undefined}
+                          >
+                            <span className="font-medium text-[var(--foreground)]">{tool.name}</span>
+                            <span className="text-xs text-[var(--foreground-muted)]">{tool.headline}</span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+          </div>
+
+          <div className="mt-5 hidden rounded-2xl border border-[var(--surface-border)]/60 px-3 py-2 text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)] lg:flex">
+            Ctrl/⌘ + K
+          </div>
+        </aside>
+
+        <main className="flex flex-1 flex-col overflow-hidden px-5 pb-6 pt-6 sm:px-8 lg:pt-8">
+          <div className="flex-1 overflow-y-auto">
+            {activeTool ? (
+              <div className="space-y-6">
+                <ToolHeader tool={activeTool} />
+                <div className="rounded-3xl border border-[var(--surface-border)]/40 bg-[var(--background-subtle)] p-6 shadow-[0_30px_120px_-90px_var(--glow)] transition-shadow duration-300 hover:shadow-[0_45px_140px_-90px_var(--glow)]">
+                  {activeTool.component ? (
+                    <activeTool.component />
+                  ) : (
+                    <p className="text-sm text-[var(--foreground-muted)]">
+                      Tool implementation coming soon.
+                    </p>
+                  )}
+                </div>
               </div>
             ) : (
-              <p className="text-sm text-[var(--foreground-muted)]">No tools match "{searchQuery}" yet.</p>
+              <p className="text-sm text-[var(--foreground-muted)]">Choose a tool to begin.</p>
             )}
           </div>
-        ) : null}
-      </div>
-      <div className="flex flex-1 flex-col overflow-hidden p-6">
-        <div className="flex-1 overflow-y-auto">
-          {activeTool ? (
-            <div className="space-y-6">
-              <ToolHeader tool={activeTool} />
-              <div className="rounded-2xl border border-[var(--surface-border)]/40 bg-[var(--background-subtle)] p-6">
-                {activeTool.component ? (
-                  <activeTool.component />
-                ) : (
-                  <p className="text-sm text-[var(--foreground-muted)]">
-                    Tool implementation coming soon.
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-[var(--foreground-muted)]">Choose a tool to begin.</p>
-          )}
-        </div>
+        </main>
       </div>
       <CommandPalette
         open={paletteOpen}

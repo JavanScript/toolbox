@@ -18,14 +18,42 @@ const principles = [
   },
 ];
 
+const toolCategories = [
+  {
+    category: "Text & Data",
+    count: "12 tools",
+    examples: "JSON formatter, Base64 encoder, Diff checker, Lorem Ipsum generator",
+  },
+  {
+    category: "Conversion",
+    count: "8 tools",
+    examples: "Unit converter, Color picker, Timestamp converter, cURL to code",
+  },
+  {
+    category: "Development",
+    count: "15 tools",
+    examples: "UUID generator, JWT decoder, Hash generator, Regex tester",
+  },
+  {
+    category: "Web & Media",
+    count: "9 tools",
+    examples: "Image optimizer, SVG minifier, CSS beautifier, URL parser",
+  },
+  {
+    category: "Utilities",
+    count: "6 tools",
+    examples: "QR code generator, Password generator, Markdown preview, Math evaluator",
+  },
+];
+
 
 export default function Home() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_12%_18%,rgba(88,166,255,0.24),transparent_60%),radial-gradient(circle_at_78%_12%,rgba(88,166,255,0.16),transparent_50%)]">
       <div className="absolute inset-0 opacity-[0.22] blur-3xl bg-[radial-gradient(circle_at_top,rgba(88,166,255,0.38),transparent_60%)]" aria-hidden />
       <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[rgba(10,12,20,0.9)] via-transparent to-transparent" aria-hidden />
-      <div className="relative z-10 flex min-h-screen w-full flex-col px-4 pb-24 pt-6 sm:px-10 lg:px-16">
-        <section className="flex flex-1 flex-col gap-8">
+      <div className="relative z-10 flex min-h-screen w-full flex-col pb-4">
+        <section className="flex flex-1 flex-col">
           <div className="flex flex-1 flex-col">
             <ToolWorkspace />
           </div>
@@ -82,9 +110,44 @@ export default function Home() {
               </span>
             </div>
           </div>
+
+          <div className="mx-auto w-full max-w-5xl px-4">
+            <div className="text-center mb-16">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--surface-border)]/40 bg-[rgba(10,12,20,0.7)] px-5 py-1.5 text-xs uppercase tracking-[0.45em] text-[var(--foreground-muted)] shadow-[0_10px_40px_-30px_var(--glow)]">
+                50+ tools at launch
+              </span>
+              <h2 className="mt-8 text-3xl font-semibold text-[var(--foreground)] sm:text-[34px]">
+                Every utility you reach for, organized by workflow.
+              </h2>
+              <p className="mt-4 text-sm text-[var(--foreground-muted)] sm:text-base">
+                From data transformation to web optimization, all your daily development tasks in one seamless interface.
+              </p>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {toolCategories.map((item) => (
+                <div
+                  key={item.category}
+                  className="group relative rounded-3xl border border-[var(--surface-border)]/60 bg-[rgba(10,12,20,0.72)] p-6 shadow-[0_30px_120px_-70px_var(--glow)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--accent)]/60 hover:shadow-[0_35px_140px_-70px_var(--glow)]"
+                >
+                  <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(88,166,255,0.4)] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden />
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-[var(--foreground)]">
+                      {item.category}
+                    </h3>
+                    <span className="rounded-full border border-[var(--surface-border)]/50 bg-[rgba(88,166,255,0.12)] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[var(--accent)]">
+                      {item.count}
+                    </span>
+                  </div>
+                  <p className="text-sm text-[var(--foreground-muted)] leading-relaxed">
+                    {item.examples}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
-        <footer className="mt-20 flex flex-col gap-4 border-t border-[var(--surface-border)]/60 py-8 text-xs text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between">
+        <footer className="mt-20 flex flex-col gap-4 border-t border-[var(--surface-border)]/60 px-4 py-8 text-xs text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-16">
           <p>
             © {new Date().getFullYear()} devtools.io — crafted for the modern web developer.
           </p>

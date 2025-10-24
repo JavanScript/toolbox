@@ -1,16 +1,13 @@
 "use client";
 
 import { useCallback } from "react";
-import {
-  toGo,
-  toJavaScript,
-  toNodeAxios,
-  toPython,
-} from "curlconverter/dist/src/index.js";
 import { CopyButton } from "@/components/copy-button";
 import { useToast } from "@/components/toast-provider";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { ToolButton, ToolError } from "@/components/tools/tool-ui";
+
+// Dynamic import to avoid SSR issues with native modules
+let curlconverter: any = null;
 
 interface CurlState {
   input: string;
@@ -40,13 +37,18 @@ export function CurlToCodeConverter() {
   });
   const { notify } = useToast();
 
-  const run = useCallback(() => {
+  const run = useCallback(async () => {
     try {
+      // Lazy load curlconverter to avoid SSR issues
+      if (!curlconverter) {
+        curlconverter = await import("curlconverter/dist/src/index.js");
+      }
+
       const command = value.input.trim() || SAMPLE_CURL;
-      const javascript = toJavaScript(command);
-      const axios = toNodeAxios(command);
-      const python = toPython(command);
-      const go = toGo(command);
+      const javascript = curlconverter.toJavaScript(command);
+      const axios = curlconverter.toNodeAxios(command);
+      const python = curlconverter.toPython(command);
+      const go = curlconverter.toGo(command);
       setValue({
         input: command,
         outputs: { javascript, axios, python, go },

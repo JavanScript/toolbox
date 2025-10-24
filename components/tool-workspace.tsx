@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 import { CommandPalette } from "@/components/command-palette";
 import type { ToolDefinition } from "@/lib/tools";
 import { toolDefinitions } from "@/lib/tools";
@@ -27,6 +27,7 @@ export function ToolWorkspace() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [paletteQuery, setPaletteQuery] = useState("");
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,6 +59,13 @@ export function ToolWorkspace() {
     }));
   }, []);
 
+  const containerStyle = useMemo<CSSProperties>(() => {
+    const computedHeight = viewportHeight ? `${viewportHeight}px` : "100vh";
+    return {
+      height: computedHeight,
+    };
+  }, [viewportHeight]);
+
   const handleSelect = useCallback((toolId: string) => {
     setActiveToolId(toolId);
     setPaletteOpen(false);
@@ -86,6 +94,24 @@ export function ToolWorkspace() {
   );
 
   useEffect(() => {
+    // Track the real viewport height so the workspace can lock to it and keep internal regions scrollable.
+    const viewport = window.visualViewport;
+    const updateHeight = () => {
+      const height = viewport?.height ?? window.innerHeight;
+      setViewportHeight(height);
+    };
+
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    viewport?.addEventListener("resize", updateHeight);
+
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+      viewport?.removeEventListener("resize", updateHeight);
+    };
+  }, []);
+
+  useEffect(() => {
     function handleExternalSearch(event: Event) {
       const customEvent = event as CustomEvent<{ query?: string; openPalette?: boolean }>;
       const { query = "", openPalette = false } = customEvent.detail ?? {};
@@ -107,9 +133,10 @@ export function ToolWorkspace() {
   return (
     <div
       ref={containerRef}
-      className="flex h-full min-h-[640px] w-full flex-col overflow-hidden rounded-[40px] border border-[var(--surface-border)]/80 bg-[rgba(10,12,20,0.78)] shadow-[0_40px_120px_-60px_var(--glow)] backdrop-blur-xl"
+      style={containerStyle}
+      className="flex w-full flex-col overflow-hidden rounded-b-[40px] border border-[var(--surface-border)]/80 bg-[rgba(10,12,20,0.78)] shadow-[0_40px_120px_-60px_var(--glow)] backdrop-blur-xl"
     >
-      <header className="relative overflow-hidden border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.88)] px-5 py-6 shadow-[inset_0_-1px_0_rgba(88,166,255,0.08)] sm:px-8">
+      <header className="relative flex-shrink-0 overflow-hidden border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.88)] px-5 py-6 shadow-[inset_0_-1px_0_rgba(88,166,255,0.08)] sm:px-8">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(88,166,255,0.4)] to-transparent" aria-hidden />
         <div className="pointer-events-none absolute -top-20 right-0 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(88,166,255,0.18),transparent_70%)] blur-3xl" aria-hidden />
         <div className="relative flex flex-wrap items-center justify-between gap-6">
@@ -195,16 +222,16 @@ export function ToolWorkspace() {
           </div>
         </div>
       </header>
-      <div className="flex flex-1 flex-col lg:flex-row">
-        <aside className="flex w-full flex-shrink-0 flex-col border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.85)] px-5 pb-6 pt-5 transition lg:w-[320px] lg:border-b-0 lg:border-r lg:px-7 lg:py-8">
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)]">
+      <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
+        <aside className="flex w-full flex-shrink-0 flex-col overflow-hidden border-b border-[var(--surface-border)]/60 bg-[rgba(8,10,16,0.85)] px-5 pb-6 pt-5 transition lg:w-[320px] lg:border-b-0 lg:border-r lg:px-7 lg:py-8">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)] flex-shrink-0">
             <span>{searchQuery ? "Search results" : "Tool collections"}</span>
             <span className="rounded-full border border-[var(--surface-border)]/50 px-2 py-0.5 text-[10px] text-[var(--foreground-disabled)]">
               {searchQuery ? filteredTools.length : toolDefinitions.length}
             </span>
           </div>
 
-          <div className="relative mt-6 flex-1 overflow-hidden">
+          <div className="relative mt-6 flex-1 min-h-0 overflow-hidden">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[rgba(8,10,16,0.92)] via-[rgba(8,10,16,0.86)]/60 to-transparent" aria-hidden />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-[rgba(8,10,16,0.92)] via-[rgba(8,10,16,0.86)]/60 to-transparent" aria-hidden />
             <div className="scrollbar-soft flex h-full flex-col overflow-y-auto pr-1">
@@ -298,12 +325,12 @@ export function ToolWorkspace() {
             </div>
           </div>
 
-          <div className="mt-5 hidden rounded-2xl border border-[var(--surface-border)]/60 px-3 py-2 text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)] lg:flex">
+          <div className="mt-5 flex-shrink-0 hidden rounded-2xl border border-[var(--surface-border)]/60 px-3 py-2 text-[10px] uppercase tracking-[0.35em] text-[var(--foreground-muted)] lg:flex">
             Ctrl/⌘ + K
           </div>
         </aside>
 
-        <main className="flex flex-1 flex-col overflow-hidden px-5 pb-6 pt-6 sm:px-8 lg:pt-8">
+        <main className="flex flex-1 min-h-0 flex-col overflow-hidden px-5 pb-6 pt-6 sm:px-8 lg:pt-8">
           <div className="flex-1 overflow-y-auto">
             {activeTool ? (
               <div className="space-y-6">
